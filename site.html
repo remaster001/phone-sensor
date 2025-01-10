@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyroscope Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .data {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gyroscope Data</h1>
+    <div class="data" id="gyroX">X: 0</div>
+    <div class="data" id="gyroY">Y: 0</div>
+    <div class="data" id="gyroZ">Z: 0</div>
+
+    <script>
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", (event) => {
+                // Get gyroscopic data
+                const x = event.beta;  // Rotation around X-axis (front-to-back tilt)
+                const y = event.gamma; // Rotation around Y-axis (side-to-side tilt)
+                const z = event.alpha; // Rotation around Z-axis (compass direction)
+
+                // Update HTML content
+                document.getElementById("gyroX").innerText = `X: ${x.toFixed(2)}`;
+                document.getElementById("gyroY").innerText = `Y: ${y.toFixed(2)}`;
+                document.getElementById("gyroZ").innerText = `Z: ${z.toFixed(2)}`;
+            });
+        } else {
+            alert("Your device does not support Device Orientation events.");
+        }
+    </script>
+</body>
+</html>
