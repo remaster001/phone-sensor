@@ -67,7 +67,7 @@
         }
         function StartRotationRate() {
             if (window.DeviceMotionEvent) {
-                window.addEventListener("DeviceMotionEvent", (event) => {
+                window.addEventListener("devicemotion", (event) => {
                     //  event.rotationRate.alpha
                     const dx = event.rotationRate.beta;  // rate of rotation of Front-to-back tilt
                     const dy = event.rotationRate.gamma; // rate of rotation Side-to-side tilt
@@ -128,3 +128,4 @@
     </script>
 </body>
 </html>
+rotationRate label and LowestRotationRateOfGyro label
