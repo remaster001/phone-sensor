@@ -14,6 +14,15 @@
             font-size: 1.5em;
             margin: 10px 0;
         }
+        #permission-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -21,23 +30,50 @@
     <div class="data" id="gyroX">X: 0</div>
     <div class="data" id="gyroY">Y: 0</div>
     <div class="data" id="gyroZ">Z: 0</div>
+    <button id="permission-btn">Enable Gyroscope</button>
 
     <script>
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener("deviceorientation", (event) => {
-                // Get gyroscopic data
-                const x = event.beta;  // Rotation around X-axis (front-to-back tilt)
-                const y = event.gamma; // Rotation around Y-axis (side-to-side tilt)
-                const z = event.alpha; // Rotation around Z-axis (compass direction)
+        const permissionButton = document.getElementById("permission-btn");
+        const gyroX = document.getElementById("gyroX");
+        const gyroY = document.getElementById("gyroY");
+        const gyroZ = document.getElementById("gyroZ");
 
-                // Update HTML content
-                document.getElementById("gyroX").innerText = `X: ${x.toFixed(2)}`;
-                document.getElementById("gyroY").innerText = `Y: ${y.toFixed(2)}`;
-                document.getElementById("gyroZ").innerText = `Z: ${z.toFixed(2)}`;
-            });
-        } else {
-            alert("Your device does not support Device Orientation events.");
+        // Function to start listening for gyroscope data
+        function startGyroscope() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener("deviceorientation", (event) => {
+                    const x = event.beta;  // Front-to-back tilt
+                    const y = event.gamma; // Side-to-side tilt
+                    const z = event.alpha; // Compass direction
+                    gyroX.innerText = `X: ${x ? x.toFixed(2) : "0"}`;
+                    gyroY.innerText = `Y: ${y ? y.toFixed(2) : "0"}`;
+                    gyroZ.innerText = `Z: ${z ? z.toFixed(2) : "0"}`;
+                });
+            } else {
+                alert("Your device does not support Device Orientation events.");
+            }
         }
+
+        // Request permission for motion sensors
+        permissionButton.addEventListener("click", async () => {
+            if (typeof DeviceOrientationEvent.requestPermission === "function") {
+                try {
+                    const permissionState = await DeviceOrientationEvent.requestPermission();
+                    if (permissionState === "granted") {
+                        permissionButton.style.display = "none";
+                        startGyroscope();
+                    } else {
+                        alert("Permission denied. Cannot access gyroscope data.");
+                    }
+                } catch (error) {
+                    alert("Error requesting gyroscope permission.");
+                }
+            } else {
+                // For browsers that don't require explicit permission
+                permissionButton.style.display = "none";
+                startGyroscope();
+            }
+        });
     </script>
 </body>
 </html>
