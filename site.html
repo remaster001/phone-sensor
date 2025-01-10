@@ -39,92 +39,80 @@
     <button id="permission-btn">Enable Capture Of Sensor Data</button>
 
     <script>
-        const permissionButton = document.getElementById("permission-btn");
-        const gyroX = document.getElementById("gyroX");
-        const gyroY = document.getElementById("gyroY");
-        const gyroZ = document.getElementById("gyroZ");
+        // Correct element assignments
         const RotGyroX = document.getElementById("RotationRateOfGyroX");
-        const RotGyroY = document.getElementById("RotationRateOfGyroX");
+        const RotGyroY = document.getElementById("RotationRateOfGyroY");
         const RotGyroZ = document.getElementById("RotationRateOfGyroZ");
         const LowRotGyroX = document.getElementById("LowestRotationRateOfGyroX");
-        const LowRotGyroY = document.getElementById("LowestRotationRateOfGyroX");
+        const LowRotGyroY = document.getElementById("LowestRotationRateOfGyroY");
         const LowRotGyroZ = document.getElementById("LowestRotationRateOfGyroZ");
-        var LowestVals = [128, 128, 128]
-        // Function to start listening for gyroscope data
+
+        let LowestVals = [128, 128, 128];
         function startGyroscope() {
-            if (window.DeviceOrientationEvent) {
-                window.addEventListener("deviceorientation", (event) => {
-                    const x = event.beta;  // Front-to-back tilt
-                    const y = event.gamma; // Side-to-side tilt
-                    const z = event.alpha; // Compass direction
-                    gyroX.innerText = `X: ${x ? x.toFixed(2) : "0"}`;
-                    gyroY.innerText = `Y: ${y ? y.toFixed(2) : "0"}`;
-                    gyroZ.innerText = `Z: ${z ? z.toFixed(2) : "0"}`;
-                });
-            } else {
-                alert("Your device does not support Device Orientation events.");
-            }
-        }
+                    if (window.DeviceOrientationEvent) {
+                        window.addEventListener("deviceorientation", (event) => {
+                            const x = event.beta;  // Front-to-back tilt
+                            const y = event.gamma; // Side-to-side tilt
+                            const z = event.alpha; // Compass direction
+                            gyroX.innerText = `X: ${x ? x.toFixed(2) : "0"}`;
+                            gyroY.innerText = `Y: ${y ? y.toFixed(2) : "0"}`;
+                            gyroZ.innerText = `Z: ${z ? z.toFixed(2) : "0"}`;
+                        });
+                    } else {
+                        alert("Your device does not support Device Orientation events.");
+                    }
+                }
+        // Function to start listening for rotation rate
         function StartRotationRate() {
             if (window.DeviceMotionEvent) {
                 window.addEventListener("devicemotion", (event) => {
-                    //  event.rotationRate.alpha
-                    const dx = event.rotationRate.beta;  // rate of rotation of Front-to-back tilt
-                    const dy = event.rotationRate.gamma; // rate of rotation Side-to-side tilt
-                    const dz = event.rotationRate.alpha; // rate of rotation of Compass direction
-                    if (dx<LowestVals[0]) {
-                        LowestVals.splice(0,1,x);
-                    }
-                    if (dy<LowestVals[1]) {
-                        LowestVals.splice(1,1,y);
-                    }
-                    if (dz<LowestVals[2]) {
-                        LowestVals.splice(2,1,z);
-                    }
-                    RotGyroX.innerText = `ΔθX: ${dx ? dx.toFixed(2) : "0"}`;
-                    RotGyroY.innerText = `ΔθY: ${dy ? dy.toFixed(2) : "0"}`;
-                    RotGyroZ.innerText = `ΔθZ: ${dz ? dz.toFixed(2) : "0"}`;
+                    // Get rotation rate values
+                    const dx = event.rotationRate.beta || 0;  // Front-to-back tilt rotation rate
+                    const dy = event.rotationRate.gamma || 0; // Side-to-side tilt rotation rate
+                    const dz = event.rotationRate.alpha || 0; // Compass rotation rate
+
+                    // Update minimum values
+                    if (dx < LowestVals[0]) LowestVals[0] = dx;
+                    if (dy < LowestVals[1]) LowestVals[1] = dy;
+                    if (dz < LowestVals[2]) LowestVals[2] = dz;
+
+                    // Update the DOM elements
+                    RotGyroX.innerText = `ΔθX: ${dx.toFixed(2)}`;
+                    RotGyroY.innerText = `ΔθY: ${dy.toFixed(2)}`;
+                    RotGyroZ.innerText = `ΔθZ: ${dz.toFixed(2)}`;
+                    LowRotGyroX.innerText = `Min ΔθX: ${LowestVals[0].toFixed(2)}`;
+                    LowRotGyroY.innerText = `Min ΔθY: ${LowestVals[1].toFixed(2)}`;
+                    LowRotGyroZ.innerText = `Min ΔθZ: ${LowestVals[2].toFixed(2)}`;
                 });
             } else {
-                alert("Your device does not support Device Orientation events.");
+                alert("Your device does not support Device Motion events.");
             }
         }
-        function LowestRotRate() {
-            LowRotGyroX.innerText = `Min ΔθX: ${LowestVals[0] ? LowestVals[0].toFixed(2) : "0"}`;
-            LowRotGyroY.innerText = `Min ΔθY: ${LowestVals[1] ? LowestVals[1].toFixed(2) : "0"}`;
-            LowRotGyroZ.innerText = `Min ΔθZ: ${LowestVals[2] ? LowestVals[2].toFixed(2) : "0"}`;
-        }
-        function ChangeColor(Elementid, color) {
-            document.getElementById(Elementid).style.color = color
-        }
 
-        // Request permission for motion sensors
+        // Request permission and initialize
         permissionButton.addEventListener("click", async () => {
-            if (typeof DeviceOrientationEvent.requestPermission === "function") {
+            if (typeof DeviceMotionEvent.requestPermission === "function") {
                 try {
                     const permissionState = await DeviceOrientationEvent.requestPermission();
                     const permissionState2 = await DeviceMotionEvent.requestPermission();
                     if (permissionState === "granted" && permissionState2 === "granted") {
                         permissionButton.style.display = "none";
-                        ChangeColor("permission-btn","green")
                         startGyroscope();
                         StartRotationRate();
-                        LowestRotRate();
                     } else {
-                        alert("Permission denied. Cannot access gyroscope data.");
+                        alert("Permission denied. Cannot access motion sensor data.");
                     }
                 } catch (error) {
-                    alert("Error requesting gyroscope permission.");
+                    alert("Error requesting permission for motion sensors.");
                 }
             } else {
                 // For browsers that don't require explicit permission
                 permissionButton.style.display = "none";
-                ChangeColor("permission-btn","green")
                 startGyroscope();
                 StartRotationRate();
-                LowestRotRate();
             }
         });
+
     </script>
 </body>
 </html>
