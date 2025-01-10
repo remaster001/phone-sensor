@@ -30,14 +30,26 @@
     <div class="data" id="gyroX">X: 0</div>
     <div class="data" id="gyroY">Y: 0</div>
     <div class="data" id="gyroZ">Z: 0</div>
-    <button id="permission-btn">Enable Gyroscope</button>
+    <div class="data" id="RotationRateOfGyroX">ΔθX: 0</div>
+    <div class="data" id="RotationRateOfGyroY">ΔθY: 0</div>
+    <div class="data" id="RotationRateOfGyroZ">ΔθZ: 0</div>
+    <div class="data" id="LowestRotationRateOfGyroX">Min ΔθX: 0</div>
+    <div class="data" id="LowestRotationRateOfGyroY">Min ΔθY: 0</div>
+    <div class="data" id="LowestRotationRateOfGyroZ">Min ΔθZ: 0</div>
+    <button id="permission-btn">Enable Capture Of Sensor Data</button>
 
     <script>
         const permissionButton = document.getElementById("permission-btn");
         const gyroX = document.getElementById("gyroX");
         const gyroY = document.getElementById("gyroY");
         const gyroZ = document.getElementById("gyroZ");
-
+        const RotGyroX = document.getElementById("RotationRateOfGyroX");
+        const RotGyroY = document.getElementById("RotationRateOfGyroX");
+        const RotGyroZ = document.getElementById("RotationRateOfGyroZ");
+        const LowRotGyroX = document.getElementById("LowestRotationRateOfGyroX");
+        const LowRotGyroY = document.getElementById("LowestRotationRateOfGyroX");
+        const LowRotGyroZ = document.getElementById("LowestRotationRateOfGyroZ");
+        let LowestVals = [128, 128, 128]
         // Function to start listening for gyroscope data
         function startGyroscope() {
             if (window.DeviceOrientationEvent) {
@@ -53,6 +65,37 @@
                 alert("Your device does not support Device Orientation events.");
             }
         }
+        function StartRotationRate() {
+            if (window.DeviceMotionEvent) {
+                window.addEventListener("DeviceMotionEvent", (event) => {
+                    const x = event.beta;  // Front-to-back tilt
+                    const y = event.gamma; // Side-to-side tilt
+                    const z = event.alpha; // Compass direction
+                    if (x<LowestVals[0]) {
+                        LowestVals.splice(0,1,x);
+                    }
+                    if (y<LowestVals[1]) {
+                        LowestVals.splice(1,1,y);
+                    }
+                    if (z<LowestVals[2]) {
+                        LowestVals.splice(2,1,z);
+                    }
+                    RotGyroX.innerText = `ΔθX: ${x ? x.toFixed(2) : "0"}`;
+                    RotGyroY.innerText = `ΔθY: ${y ? y.toFixed(2) : "0"}`;
+                    RotGyroZ.innerText = `ΔθZ: ${z ? z.toFixed(2) : "0"}`;
+                });
+            } else {
+                alert("Your device does not support Device Orientation events.");
+            }
+        }
+        function LowestRotRate() {
+            LowRotGyroX.innerText = `Min ΔθX: ${LowestVals[0] ? LowestVals[0].toFixed(2) : "0"}`;
+            LowRotGyroY.innerText = `Min ΔθY: ${LowestVals[1] ? LowestVals[1].toFixed(2) : "0"}`;
+            LowRotGyroZ.innerText = `Min ΔθZ: ${LowestVals[2] ? LowestVals[2].toFixed(2) : "0"}`;
+        }
+        function ChangeColor(Elementid, color) {
+            document.getElementById(Elementid).style.color = color
+        }
 
         // Request permission for motion sensors
         permissionButton.addEventListener("click", async () => {
@@ -61,7 +104,9 @@
                     const permissionState = await DeviceOrientationEvent.requestPermission();
                     if (permissionState === "granted") {
                         permissionButton.style.display = "none";
+                        ChangeColor("permission-btn","green")
                         startGyroscope();
+                        StartRotationRate();
                     } else {
                         alert("Permission denied. Cannot access gyroscope data.");
                     }
@@ -72,6 +117,7 @@
                 // For browsers that don't require explicit permission
                 permissionButton.style.display = "none";
                 startGyroscope();
+                StartRotationRate();
             }
         });
     </script>
