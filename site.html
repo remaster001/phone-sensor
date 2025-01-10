@@ -81,9 +81,9 @@
                     if (dz<LowestVals[2]) {
                         LowestVals.splice(2,1,z);
                     }
-                    RotGyroX.innerText = `ΔθX: ${dx ? x.toFixed(2) : "0"}`;
-                    RotGyroY.innerText = `ΔθY: ${dy ? y.toFixed(2) : "0"}`;
-                    RotGyroZ.innerText = `ΔθZ: ${dz ? z.toFixed(2) : "0"}`;
+                    RotGyroX.innerText = `ΔθX: ${dx ? dx.toFixed(2) : "0"}`;
+                    RotGyroY.innerText = `ΔθY: ${dy ? dy.toFixed(2) : "0"}`;
+                    RotGyroZ.innerText = `ΔθZ: ${dz ? dz.toFixed(2) : "0"}`;
                 });
             } else {
                 alert("Your device does not support Device Orientation events.");
@@ -103,7 +103,8 @@
             if (typeof DeviceOrientationEvent.requestPermission === "function") {
                 try {
                     const permissionState = await DeviceOrientationEvent.requestPermission();
-                    if (permissionState === "granted") {
+                    const permissionState2 = await DeviceMotionEvent.requestPermission();
+                    if (permissionState === "granted" && permissionState2 === "granted") {
                         permissionButton.style.display = "none";
                         ChangeColor("permission-btn","green")
                         startGyroscope();
@@ -118,6 +119,7 @@
             } else {
                 // For browsers that don't require explicit permission
                 permissionButton.style.display = "none";
+                ChangeColor("permission-btn","green")
                 startGyroscope();
                 StartRotationRate();
                 LowestRotRate();
