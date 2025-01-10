@@ -49,7 +49,7 @@
         const LowRotGyroX = document.getElementById("LowestRotationRateOfGyroX");
         const LowRotGyroY = document.getElementById("LowestRotationRateOfGyroX");
         const LowRotGyroZ = document.getElementById("LowestRotationRateOfGyroZ");
-        let LowestVals = [128, 128, 128]
+        var LowestVals = [128, 128, 128]
         // Function to start listening for gyroscope data
         function startGyroscope() {
             if (window.DeviceOrientationEvent) {
@@ -68,21 +68,22 @@
         function StartRotationRate() {
             if (window.DeviceMotionEvent) {
                 window.addEventListener("DeviceMotionEvent", (event) => {
-                    const x = event.beta;  // Front-to-back tilt
-                    const y = event.gamma; // Side-to-side tilt
-                    const z = event.alpha; // Compass direction
-                    if (x<LowestVals[0]) {
+                    //  event.rotationRate.alpha
+                    const dx = event.rotationRate.beta;  // rate of rotation of Front-to-back tilt
+                    const dy = event.rotationRate.gamma; // rate of rotation Side-to-side tilt
+                    const dz = event.rotationRate.alpha; // rate of rotation of Compass direction
+                    if (dx<LowestVals[0]) {
                         LowestVals.splice(0,1,x);
                     }
-                    if (y<LowestVals[1]) {
+                    if (dy<LowestVals[1]) {
                         LowestVals.splice(1,1,y);
                     }
-                    if (z<LowestVals[2]) {
+                    if (dz<LowestVals[2]) {
                         LowestVals.splice(2,1,z);
                     }
-                    RotGyroX.innerText = `ΔθX: ${x ? x.toFixed(2) : "0"}`;
-                    RotGyroY.innerText = `ΔθY: ${y ? y.toFixed(2) : "0"}`;
-                    RotGyroZ.innerText = `ΔθZ: ${z ? z.toFixed(2) : "0"}`;
+                    RotGyroX.innerText = `ΔθX: ${dx ? x.toFixed(2) : "0"}`;
+                    RotGyroY.innerText = `ΔθY: ${dy ? y.toFixed(2) : "0"}`;
+                    RotGyroZ.innerText = `ΔθZ: ${dz ? z.toFixed(2) : "0"}`;
                 });
             } else {
                 alert("Your device does not support Device Orientation events.");
@@ -107,6 +108,7 @@
                         ChangeColor("permission-btn","green")
                         startGyroscope();
                         StartRotationRate();
+                        LowestRotRate();
                     } else {
                         alert("Permission denied. Cannot access gyroscope data.");
                     }
@@ -118,6 +120,7 @@
                 permissionButton.style.display = "none";
                 startGyroscope();
                 StartRotationRate();
+                LowestRotRate();
             }
         });
     </script>
